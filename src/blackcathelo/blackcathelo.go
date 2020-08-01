@@ -2,11 +2,8 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
-	"log"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
@@ -17,18 +14,7 @@ var (
 )
 
 func init() {
-	c, err := ioutil.ReadFile(".env")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	line := strings.Split(string(c), "=")
-	if line[0] == "DISCORD_CHANNEL_SECRET" {
-		Token = line[1]
-	}
-	/*
-		flag.StringVar(&Token, "t", , "Bot Token")
-		flag.Parse()*/
+	Token = getToken(".env")
 }
 
 func main() {
