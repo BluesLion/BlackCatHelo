@@ -11,6 +11,7 @@ blackcathelo:
 
 test:
 	go test -count=1 blackcathelo
+	go test -count=1 lib/luck
 
 clean:
 	rm -fr bin lib pkg
