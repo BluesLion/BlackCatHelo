@@ -13,14 +13,10 @@ var (
 	Token string
 )
 
-func init() {
-	Token = getToken(".env")
-}
-
 func main() {
-
+	Token = getToken(".env")
 	if Token == "" {
-		fmt.Println("No token provided. Please run: airhorn -t <bot token>")
+		fmt.Println("No token provided. Please add .env file")
 		return
 	}
 	// Create a new Discord session using the provided bot token.
