@@ -1,6 +1,7 @@
 package main
 
 import (
+	"lib/dndalign"
 	"lib/luck"
 	"log"
 	"os"
@@ -57,15 +58,22 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	respHeader := "<@" + m.Author.ID + ">" + "\n" + m.Content
+
 	if strings.Index(m.Content, "運勢") >= 0 {
 		s.ChannelMessageSend(
 			m.ChannelID,
-			"<@"+m.Author.ID+">"+"\n"+m.Content+"："+luck.GetResults(),
+			respHeader+"："+luck.GetResults(),
 		)
 		return
 	}
 
 	switch m.Content {
+	case "九大陣營":
+		s.ChannelMessageSend(
+			m.ChannelID,
+			respHeader+" → "+dndalign.GetResults(),
+		)
 	default:
 		return
 	}
