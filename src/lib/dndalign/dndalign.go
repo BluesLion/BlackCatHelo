@@ -1,9 +1,6 @@
 package dndalign
 
-import (
-	"math/rand"
-	"time"
-)
+import "lib/rcore"
 
 var results = []string{
 	"守序善良",
@@ -18,6 +15,5 @@ var results = []string{
 }
 
 func GetResults() string {
-	rand.Seed(time.Now().UnixNano())
-	return results[rand.Intn(len(results))]
+	return rcore.PickOne(results)
 }

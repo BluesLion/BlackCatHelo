@@ -3,6 +3,7 @@ package main
 import (
 	"lib/dndalign"
 	"lib/luck"
+	"lib/rcore"
 	"log"
 	"os"
 	"os/signal"
@@ -58,12 +59,33 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	respHeader := "<@" + m.Author.ID + ">" + "\n" + m.Content
+	respHeader := "<@" + m.Author.ID + ">"
 
 	if strings.Index(m.Content, "運勢") >= 0 {
 		s.ChannelMessageSend(
 			m.ChannelID,
-			respHeader+"："+luck.GetResults(),
+			respHeader+"\n"+m.Content+"："+luck.GetResults(),
+		)
+		return
+	}
+
+	if strings.Index(strings.ToLower(m.Content[:6]), "choice") == 0 {
+		set := strings.Split(m.Content, " ")
+		ret := rcore.PickOne(set)
+
+		resp := respHeader + "\n" + set[0] + " ["
+
+		for i := 1; i < len(set); i++ {
+			if i != 1 {
+				resp = resp + ", "
+			}
+			resp = resp + set[i]
+		}
+
+		resp = resp + "]\n" + " → " + ret
+		s.ChannelMessageSend(
+			m.ChannelID,
+			resp,
 		)
 		return
 	}
@@ -72,7 +94,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	case "九大陣營":
 		s.ChannelMessageSend(
 			m.ChannelID,
-			respHeader+" → "+dndalign.GetResults(),
+			respHeader+"\n"+m.Content+" → "+dndalign.GetResults(),
 		)
 	default:
 		return
