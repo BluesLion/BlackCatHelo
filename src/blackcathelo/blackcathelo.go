@@ -2,6 +2,7 @@ package main
 
 import (
 	"lib/dndalign"
+	"lib/eat"
 	"lib/luck"
 	"lib/rcore"
 	"lib/tarot"
@@ -71,7 +72,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	if strings.Index(strings.ToLower(m.Content[:6]), "choice") == 0 {
-		set := strings.Split(m.Content, " ")
+		set := strings.Fields(m.Content)
 		ret := rcore.PickOne(set)
 
 		resp := respHeader + "\n" + set[0] + " ["
@@ -87,6 +88,14 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSend(
 			m.ChannelID,
 			resp,
+		)
+		return
+	}
+
+	if strings.Index(m.Content, "吃什麼") == 0 {
+		s.ChannelMessageSend(
+			m.ChannelID,
+			respHeader+"\n"+m.Content+"："+eat.GetResults(),
 		)
 		return
 	}
