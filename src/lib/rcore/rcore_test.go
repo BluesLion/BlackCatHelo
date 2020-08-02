@@ -5,10 +5,10 @@ import "testing"
 func TestRcore(t *testing.T) {
 	retsults := []string{"A", "fgdf", "asdasdasd"}
 
-	ret = PickOne(retsults)
+	ret := PickOne(retsults)
 
-	for i := range ret {
-		if ret == ret[i] {
+	for i := range retsults {
+		if ret == retsults[i] {
 			return
 		}
 	}

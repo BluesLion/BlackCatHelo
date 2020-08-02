@@ -4,6 +4,7 @@ import (
 	"lib/dndalign"
 	"lib/luck"
 	"lib/rcore"
+	"lib/tarot"
 	"log"
 	"os"
 	"os/signal"
@@ -95,6 +96,11 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSend(
 			m.ChannelID,
 			respHeader+"\n"+m.Content+" → "+dndalign.GetResults(),
+		)
+	case "每日塔羅":
+		s.ChannelMessageSend(
+			m.ChannelID,
+			respHeader+"\n"+m.Content+" → "+tarot.GetResults(),
 		)
 	default:
 		return
