@@ -141,6 +141,46 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			m.ChannelID,
 			respHeader+"\n"+m.Content+" → "+tarot.GetResults(),
 		)
+	case "我要變藍色":
+		r, err := s.GuildRoles(m.GuildID)
+		if err != nil {
+			s.ChannelMessageSend(
+				m.ChannelID,
+				respHeader+"\n"+"我變不了顏色",
+			)
+			return
+		}
+
+		for i := range r {
+			if r[i].Name == "Blue" {
+				s.GuildMemberRoleAdd(m.GuildID, m.Author.ID, r[i].ID)
+				s.ChannelMessageSend(
+					m.ChannelID,
+					respHeader+"\n"+"OK",
+				)
+				return
+			}
+		}
+	case "我不要藍色":
+		r, err := s.GuildRoles(m.GuildID)
+		if err != nil {
+			s.ChannelMessageSend(
+				m.ChannelID,
+				respHeader+"\n"+"我變不了顏色",
+			)
+			return
+		}
+
+		for i := range r {
+			if r[i].Name == "Blue" {
+				s.GuildMemberRoleRemove(m.GuildID, m.Author.ID, r[i].ID)
+				s.ChannelMessageSend(
+					m.ChannelID,
+					respHeader+"\n"+"OK",
+				)
+				return
+			}
+		}
 	case "海螺幫幫我":
 		s.ChannelMessageSend(
 			m.ChannelID,
