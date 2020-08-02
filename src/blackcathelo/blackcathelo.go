@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"lib/dndalign"
 	"lib/eat"
 	"lib/luck"
@@ -9,6 +10,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"syscall"
 
@@ -71,7 +73,8 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	if strings.Index(strings.ToLower(m.Content[:6]), "choice") == 0 {
+	if (len(m.Content) > 6) &&
+		strings.Index(strings.ToLower(m.Content[:6]), "choice") == 0 {
 		set := strings.Fields(m.Content)
 		ret := rcore.PickOne(set)
 
@@ -93,9 +96,36 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	if strings.Index(m.Content, "吃什麼") == 0 {
+		set := strings.Fields(m.Content)
+		resp := eat.GetResults()
+		title := ""
+
+		if len(set) == 2 {
+			count, err := strconv.Atoi(set[1])
+			if err != nil {
+				count = 1
+			}
+
+			if count > 30 {
+				count = 30
+			}
+
+			title = fmt.Sprintf("%d 個吃什麼 → ", count)
+
+			for i := 1; i < count; i++ {
+				ret := eat.GetResults()
+				if strings.Index(resp, ret) < 0 {
+					resp = resp + ", "
+					resp = resp + ret
+				} else {
+					i--
+				}
+			}
+		}
+
 		s.ChannelMessageSend(
 			m.ChannelID,
-			respHeader+"\n"+m.Content+"："+eat.GetResults(),
+			respHeader+"\n"+title+resp,
 		)
 		return
 	}
@@ -110,6 +140,11 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSend(
 			m.ChannelID,
 			respHeader+"\n"+m.Content+" → "+tarot.GetResults(),
+		)
+	case "海螺幫幫我":
+		s.ChannelMessageSend(
+			m.ChannelID,
+			respHeader+"\n"+Help,
 		)
 	default:
 		return
