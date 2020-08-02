@@ -76,6 +76,10 @@ var results = []string{
 	"抓餅",
 	"碗粿",
 	"冰淇淋",
+	"鐵板燒",
+	"臭豆腐",
+	"粉圓豆花",
+	"粉圓冰",
 }
 
 func GetResults() string {
