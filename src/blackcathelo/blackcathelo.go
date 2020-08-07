@@ -57,6 +57,10 @@ func main() {
 // This function will be called (due to AddHandler above) every time a new
 // message is created on any channel that the authenticated bot has access to.
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
+	if m.Author.Bot {
+		return
+	}
+
 	// Ignore all messages created by the bot itself
 	// This isn't required in this specific example but it's a good practice.
 	if m.Author.ID == s.State.User.ID {
@@ -76,7 +80,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if (len(m.Content) > 6) &&
 		strings.Index(strings.ToLower(m.Content[:6]), "choice") == 0 {
 		set := strings.Fields(m.Content)
-		ret := rcore.PickOne(set)
+		ret := rcore.PickOne(set[1:])
 
 		resp := respHeader + "\n" + set[0] + " ["
 
@@ -136,11 +140,13 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			m.ChannelID,
 			respHeader+"\n"+m.Content+" → "+dndalign.GetResults(),
 		)
+
 	case "每日塔羅":
 		s.ChannelMessageSend(
 			m.ChannelID,
 			respHeader+"\n"+m.Content+" → "+tarot.GetResults(),
 		)
+
 	case "我要變藍色":
 		r, err := s.GuildRoles(m.GuildID)
 		if err != nil {
@@ -156,7 +162,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				s.GuildMemberRoleAdd(m.GuildID, m.Author.ID, r[i].ID)
 				s.ChannelMessageSend(
 					m.ChannelID,
-					respHeader+"\n"+"OK",
+					respHeader+"\n"+"你已經藍了！!",
 				)
 				return
 			}
@@ -176,7 +182,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				s.GuildMemberRoleRemove(m.GuildID, m.Author.ID, r[i].ID)
 				s.ChannelMessageSend(
 					m.ChannelID,
-					respHeader+"\n"+"OK",
+					respHeader+"\n"+"OK 藍色已經移除",
 				)
 				return
 			}
