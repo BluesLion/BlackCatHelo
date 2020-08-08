@@ -69,7 +69,8 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	respHeader := "<@" + m.Author.ID + ">"
 
-	if strings.Index(m.Content, "運勢") >= 0 {
+	if (strings.Index(m.Content, "運勢") == 0) ||
+		(strings.Index(m.Content, "運勢") == (len(m.Content) - len("運勢"))) {
 		s.ChannelMessageSend(
 			m.ChannelID,
 			respHeader+"\n"+m.Content+"："+luck.GetResults(),
