@@ -1,8 +1,14 @@
-package eat
+package main
 
-import "lib/rcore"
+import (
+	"fmt"
+	"strconv"
+	"strings"
 
-var results = []string{
+	"github.com/bwmarrin/discordgo"
+)
+
+var EatResults = []string{
 	"飯",
 	"炒飯",
 	"燉飯",
@@ -82,6 +88,41 @@ var results = []string{
 	"粉圓冰",
 }
 
-func GetResults() string {
-	return rcore.PickOne(results)
+func EatCond(s *discordgo.Session, m *discordgo.MessageCreate) bool {
+	if strings.Index(m.Content, "吃什麼") == 0 {
+		return true
+	}
+
+	return false
+}
+
+func EatGetResp(s *discordgo.Session, m *discordgo.MessageCreate) string {
+	set := strings.Fields(m.Content)
+	resp := PickOne(EatResults)
+	title := ""
+
+	if len(set) == 2 {
+		count, err := strconv.Atoi(set[1])
+		if err != nil {
+			count = 1
+		}
+
+		if count > 30 {
+			count = 30
+		}
+
+		title = fmt.Sprintf("%d/%d 個吃什麼 → ", count, len(EatResults))
+
+		for i := 1; i < count; i++ {
+			ret := PickOne(EatResults)
+			if strings.Index(resp, ret) < 0 {
+				resp = resp + ", "
+				resp = resp + ret
+			} else {
+				i--
+			}
+		}
+	}
+
+	return title + resp
 }

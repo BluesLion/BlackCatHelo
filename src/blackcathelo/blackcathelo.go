@@ -2,16 +2,9 @@ package main
 
 import (
 	"fmt"
-	"lib/dndalign"
-	"lib/eat"
-	"lib/luck"
-	"lib/rcore"
-	"lib/tarot"
 	"log"
 	"os"
 	"os/signal"
-	"strconv"
-	"strings"
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
@@ -67,133 +60,37 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	respHeader := "<@" + m.Author.ID + ">"
+	if m.Content == "機器貓幫幫我" {
+		resp := ""
 
-	if (strings.Index(m.Content, "運勢") == 0) ||
-		(strings.Index(m.Content, "運勢") == (len(m.Content) - len("運勢"))) {
-		s.ChannelMessageSend(
-			m.ChannelID,
-			respHeader+"\n"+m.Content+"："+luck.GetResults(),
-		)
-		return
-	}
-
-	if (len(m.Content) > 6) &&
-		strings.Index(strings.ToLower(m.Content[:6]), "choice") == 0 {
-		set := strings.Fields(m.Content)
-		ret := rcore.PickOne(set[1:])
-
-		resp := respHeader + "\n" + set[0] + " ["
-
-		for i := 1; i < len(set); i++ {
-			if i != 1 {
-				resp = resp + ", "
-			}
-			resp = resp + set[i]
-		}
-
-		resp = resp + "]\n" + " → " + ret
-		s.ChannelMessageSend(
-			m.ChannelID,
-			resp,
-		)
-		return
-	}
-
-	if strings.Index(m.Content, "吃什麼") == 0 {
-		set := strings.Fields(m.Content)
-		resp := eat.GetResults()
-		title := ""
-
-		if len(set) == 2 {
-			count, err := strconv.Atoi(set[1])
-			if err != nil {
-				count = 1
-			}
-
-			if count > 30 {
-				count = 30
-			}
-
-			title = fmt.Sprintf("%d 個吃什麼 → ", count)
-
-			for i := 1; i < count; i++ {
-				ret := eat.GetResults()
-				if strings.Index(resp, ret) < 0 {
-					resp = resp + ", "
-					resp = resp + ret
-				} else {
-					i--
-				}
-			}
+		for i, e := range Events {
+			resp = resp + fmt.Sprintf("%d. ", i+1) + e.Help
 		}
 
 		s.ChannelMessageSend(
 			m.ChannelID,
-			respHeader+"\n"+title+resp,
+			"<@"+m.Author.ID+">"+"\n"+resp,
 		)
 		return
 	}
 
-	switch m.Content {
-	case "九大陣營":
-		s.ChannelMessageSend(
-			m.ChannelID,
-			respHeader+"\n"+m.Content+" → "+dndalign.GetResults(),
-		)
+	for _, e := range Events {
+		if e.Condion(s, m) {
+			resp := ""
+			if e.isRespMention {
+				resp = resp + "<@" + m.Author.ID + ">" + "\n"
+			}
 
-	case "每日塔羅":
-		s.ChannelMessageSend(
-			m.ChannelID,
-			respHeader+"\n"+m.Content+" → "+tarot.GetResults(),
-		)
+			if e.isRespContent {
+				resp = resp + m.Content
+			}
 
-	case "我要變藍色":
-		r, err := s.GuildRoles(m.GuildID)
-		if err != nil {
+			resp = resp + e.GetResp(s, m)
 			s.ChannelMessageSend(
 				m.ChannelID,
-				respHeader+"\n"+"我變不了顏色",
+				resp,
 			)
 			return
 		}
-
-		for i := range r {
-			if r[i].Name == "Blue" {
-				s.GuildMemberRoleAdd(m.GuildID, m.Author.ID, r[i].ID)
-				s.ChannelMessageSend(
-					m.ChannelID,
-					respHeader+"\n"+"你已經藍了！!",
-				)
-				return
-			}
-		}
-	case "我不要藍色":
-		r, err := s.GuildRoles(m.GuildID)
-		if err != nil {
-			s.ChannelMessageSend(
-				m.ChannelID,
-				respHeader+"\n"+"我變不了顏色",
-			)
-			return
-		}
-
-		for i := range r {
-			if r[i].Name == "Blue" {
-				s.GuildMemberRoleRemove(m.GuildID, m.Author.ID, r[i].ID)
-				s.ChannelMessageSend(
-					m.ChannelID,
-					respHeader+"\n"+"OK 藍色已經移除",
-				)
-				return
-			}
-		}
-	case "海螺幫幫我":
-		s.ChannelMessageSend(
-			m.ChannelID,
-			respHeader+"\n"+Help,
-		)
-	default:
-		return
 	}
 }
